@@ -4,15 +4,29 @@ import random
 import string
 import time
 import os
+from datetime import datetime
 
 class DiscordSniper:
     def __init__(self):
         self.token = os.environ.get('DISCORD_TOKEN')
+        self.webhook = os.environ.get('DISCORD_WEBHOOK')
         self.available_nicks = []
         self.checked_nicks = 0
         self.start_time = None
         self.rate_limit_delay = 2
         self.base_url = "https://discord.com/api/v9"
+
+    async def send_webhook(self, nick):
+        if not self.webhook:
+            return
+        try:
+            async with aiohttp.ClientSession() as session:
+                data = {
+                    "content": f"🎯 **MÜSAİT NICK BULUNDU!**\n```{nick}```\n⏰ {datetime.now().strftime('%H:%M:%S')}"
+                }
+                await session.post(self.webhook, json=data)
+        except:
+            pass
 
     def generate_nicks(self, count=5):
         tum_karakterler = string.ascii_lowercase + string.digits
@@ -73,6 +87,7 @@ class DiscordSniper:
                     if result == True:
                         self.available_nicks.append(nick)
                         print(f"\n!!! MUSAIT NICK: {nick} !!!")
+                        await self.send_webhook(nick)
                     elif result is None:
                         print("Token hatasi! Durduruluyor...")
                         return
