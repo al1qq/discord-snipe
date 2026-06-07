@@ -14,12 +14,13 @@ class DiscordSniper:
         self.rate_limit_delay = 2
         self.base_url = "https://discord.com/api/v9"
 
-    def generate_nicks(self, pattern, length, count=5):
-        chars = string.ascii_lowercase + string.digits
+    def generate_nicks(self, count=5):
+        tum_karakterler = string.ascii_lowercase + string.digits
         nicks = []
         for _ in range(count):
-            suffix = ''.join(random.choices(chars, k=length))
-            nicks.append(f"{pattern}{suffix}")
+            uzunluk = random.randint(2, 5)
+            nick = ''.join(random.choices(tum_karakterler, k=uzunluk))
+            nicks.append(nick)
         return nicks
 
     async def check_username(self, session, username):
@@ -53,17 +54,17 @@ class DiscordSniper:
             await asyncio.sleep(3)
             return "retry"
 
-    async def start_sniping(self, pattern, length):
+    async def start_sniping(self):
         self.start_time = time.time()
         
         async with aiohttp.ClientSession() as session:
             print(f"BASLATILDI!")
-            print(f"Pattern: {pattern} + {length} karakter")
+            print(f"Tamamen rastgele nickler")
             print(f"Gecikme: {self.rate_limit_delay}s")
             print("=" * 40)
             
             while True:
-                nicks = self.generate_nicks(pattern, length, 5)
+                nicks = self.generate_nicks(5)
                 
                 for nick in nicks:
                     self.checked_nicks += 1
@@ -94,12 +95,9 @@ async def main():
         print("HATA: DISCORD_TOKEN bulunamadi!")
         return
     
-    pattern = os.environ.get('PATTERN', '4l')
-    length = int(os.environ.get('LENGTH', '3'))
     delay = float(os.environ.get('DELAY', '2'))
-    
     sniper.rate_limit_delay = delay
-    await sniper.start_sniping(pattern, length)
+    await sniper.start_sniping()
 
 if __name__ == "__main__":
     asyncio.run(main())
